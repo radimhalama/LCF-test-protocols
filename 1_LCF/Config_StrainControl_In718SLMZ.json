@@ -1,0 +1,134 @@
+{
+    "Project_Info": {
+        "Campaign_Name": "In718 SLM(Z) Additive LCF Campaign",
+        "Control_Mode": "Strain-controlled",
+        "Benchmark_Comp_Time_s": 62.876,
+        "Comment": "Generated automatically from evaluation run."
+    },
+    "CSV_Data_Format": {
+        "Delimiter": ";",
+        "Decimal_Separator": ".",
+        "Column_Names": {
+            "Time": "Time (s)",
+            "Force_or_Stress": "Stress (MPa)",
+            "Deformation_or_Strain": "Total Strain (%)",
+            "Cycle": "Cycle Number"
+        },
+        "Rows_To_Skip_Before_Zero": 3
+    },
+    "Material_Strain_Control": {
+        "Name": "In718",
+        "E0_nominal_MPa": 150000.0
+    },
+    "Material_Stress_Control": {
+        "Name": "In718",
+        "E0_nominal_MPa": 150000.0
+    },
+    "Specimen_Default_Geometry": {
+        "Data_is_direct_stress_strain": true,
+        "Strain_in_percent": true,
+        "D1_outer_mm": 10.0,
+        "D2_inner_mm": 0.0,
+        "Gauge_length_mm": 100.0,
+        "Correction_factor": 1.0
+    },
+    "Common_Evaluation_Settings": {
+        "Initial_Young_Modulus_Limits_MPa": {
+            "Bottom": 5.0,
+            "Upper": 250.0
+        },
+        "Use_Evaluated_E": true,
+        "Elastic_Region_Size_LinReg_MPa": 200.0,
+        "Offset_Plastic_Strain_Rp": 0.0001,
+        "Edyn_Compression_Drop_Percent": 10.0,
+        "Apply_Cyclic_Yield_Stress_Validity_Filter": false,
+        "Cyclic_Yield_Stress_Validity_Range_MPa": [
+            40.0,
+            300.0
+        ]
+    },
+    "Strain_Control_Specific": {
+        "Default_N_Range": [
+            160,
+            330
+        ],
+        "Sig_A_Failure_Drop_Percent": 25.0,
+        "Half_Life_Distortion_Check": true,
+        "Prefer_Previous_Cycle_At_Half_Life": false,
+        "Dynamic_Modulus_Outlier_Filter": {
+            "Tension_E0_ratio": [
+                0.6,
+                1.3
+            ],
+            "Compression_E0_ratio": [
+                0.4,
+                1.5
+            ]
+        }
+    },
+    "Stress_Control_Specific": {
+        "Default_N_RAT_Range": [
+            100,
+            500
+        ],
+        "Default_N_E10_Range": [
+            50,
+            150
+        ],
+        "Cyclic_Yield_Stress_Validity_Range_MPa": [
+            50.0,
+            1200.0
+        ],
+        "Representative_Loops_Fractions": [
+            0.166,
+            0.333,
+            0.5,
+            0.666,
+            0.833
+        ]
+    },
+    "Protocol_Metadata_Strain_Control": {
+        "Title": "Uniaxial LCF test report",
+        "Specimen_number": "ID4 solid",
+        "Material": "In718 SLM(Z)",
+        "Equipment": "Instron 8801",
+        "Institution": "VUT Brno, Czechia",
+        "Temperature": "22°C",
+        "Amplitude": "1.50 %",
+        "Loading_Rate": "0.1 %/s",
+        "Frequency_Hz": "0.0333 Hz",
+        "Date": "9. 6. 2024",
+        "Dimensions_text": "6.022 mm",
+        "Type_of_loading": "uniaxial",
+        "Gauge_length_text": "12.5 mm",
+        "Experimenter": "Josef Zapletal",
+        "Controlled_Signal_Type": "Strain-triangular",
+        "Mean_value": "0.0%",
+        "Unloading_Rate": "0.1 %/s",
+        "Sampling_Frequency": "200 points/cycle",
+        "Acknowledgments": "Financial support from the Czech Science Foundation under the registration no. 23-05338S.",
+        "Note": "Evaluated with FABER LCF Tool."
+    },
+    "Protocol_Metadata_Stress_Control": {
+        "Title": "Ratcheting LCF test",
+        "Specimen_number": "ID59 solid",
+        "Material": "In718 SLM(Z)",
+        "Equipment": "Instron 8801",
+        "Institution": "VUT Brno, Czechia",
+        "Temperature": "22°C",
+        "Amplitude": "750 MPa",
+        "Loading_Rate": "- kN/s",
+        "Frequency_Hz": "2.0 Hz",
+        "Date": "2024-06-09",
+        "Dimensions_text": "diameter 6.01 mm",
+        "Type_of_loading": "uniaxial",
+        "Gauge_length_text": "12.5 mm",
+        "Experimenter": "Josef Zapletal",
+        "Controlled_Signal_Type": "Stress-harmonic",
+        "Mean_value": "+100 MPa",
+        "Unloading_Rate": "-",
+        "Sampling_Frequency": "200 points/cycle",
+        "Acknowledgments": "Financial support from the Czech Science Foundation under the registration no. 23-05338S.",
+        "Note": "Till fracture"
+    }
+}

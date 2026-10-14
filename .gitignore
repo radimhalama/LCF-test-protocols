@@ -1,0 +1,27 @@
+# Python bytecode & environments
+__pycache__/
+*.py[cod]
+env/
+venv/
+
+# Output folders & temporary calculation files
+Output_*/
+citation.txt
+tests_single_column.csv
+output_half.csv
+Evaluation_input.csv
+amp_mean_values.csv
+mechprop_*.csv
+Reliability.csv
+Fatigue_Params_4P.csv
+Page2_Input_Table.csv
+Parameters.txt
+3D_linear_regression.txt
+
+# Generated protocols (except user manual)
+*.pdf
+!docs/User_Manual.pdf
+
+# Generated plots (except header logo)
+*.png
+!Header_logo.png
