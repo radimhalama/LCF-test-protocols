@@ -23,8 +23,10 @@ Ingests the consolidated 9-row `Inputs.txt` record to perform constitutive param
 
 ## Documentation & Examples
 
-- **User Manual:** [Read the User Manual (PDF)](docs/User_Manual.pdf) *(coming soon)*
-- **Sample Output:** [View a Pre-Generated Test Protocol (PDF)](docs/Sample_Protocol_Output.pdf) *(coming soon)*
+- **User Manual:** [Read the User Manual (PDF)](docs/FABER_LCF_Toolchain_User_Manual.pdf) 
+- **Sample Output 1 - LCF:** [View a Pre-Generated LCF Test Protocol (PDF)](docs/Protocol_LCF.pdf) 
+- **Sample Output 2 - Ratcheting:** [View a Pre-Generated Ratcheting Test Protocol (PDF)](docs/Protocol_Ratcheting.pdf) 
+- **Sample Output 3 - 3D method:** [View a Pre-Generated 3D method Protocol (PDF)](docs/Protocol_eN.pdf) 
 
 ## Installation
 
