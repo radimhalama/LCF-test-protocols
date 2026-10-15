@@ -39,7 +39,7 @@
         },
         "Use_Evaluated_E": true,
         "Elastic_Region_Size_LinReg_MPa": 200.0,
-        "Offset_Plastic_Strain_Rp": 0.0001,
+        "Offset_Plastic_Strain_Rp": 0.0005,
         "Edyn_Compression_Drop_Percent": 10.0,
         "Apply_Cyclic_Yield_Stress_Validity_Filter": true,
         "Cyclic_Yield_Stress_Validity_Range_MPa": [

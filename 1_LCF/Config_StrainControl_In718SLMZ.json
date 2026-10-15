@@ -2,7 +2,7 @@
     "Project_Info": {
         "Campaign_Name": "In718 SLM(Z) Additive LCF Campaign",
         "Control_Mode": "Strain-controlled",
-        "Benchmark_Comp_Time_s": 62.876,
+        "Benchmark_Comp_Time_s": 17.844,
         "Comment": "Generated automatically from evaluation run."
     },
     "CSV_Data_Format": {
@@ -39,7 +39,7 @@
         },
         "Use_Evaluated_E": true,
         "Elastic_Region_Size_LinReg_MPa": 200.0,
-        "Offset_Plastic_Strain_Rp": 0.0001,
+        "Offset_Plastic_Strain_Rp": 0.0005,
         "Edyn_Compression_Drop_Percent": 10.0,
         "Apply_Cyclic_Yield_Stress_Validity_Filter": false,
         "Cyclic_Yield_Stress_Validity_Range_MPa": [

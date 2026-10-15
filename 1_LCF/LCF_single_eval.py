@@ -42,25 +42,8 @@ if base_dir not in sys.path:
 trapz_func = getattr(np, 'trapezoid', getattr(np, 'trapz', None))
 
 # =============================================================================
-# BENCHMARK TIMER & FAST VECTORIZED MATHEMATICAL UTILITIES
+# FAST VECTORIZED MATHEMATICAL UTILITIES
 # =============================================================================
-class BenchmarkTimer:
-    """Measures pure active CPU computation time, pausing during user inputs and plot views."""
-    def __init__(self):
-        self.active_time = 0.0
-        self._start = None
-
-    def start(self):
-        if self._start is None:
-            self._start = time.perf_counter()
-
-    def pause(self):
-        if self._start is not None:
-            self.active_time += time.perf_counter() - self._start
-            self._start = None
-
-    def elapsed(self):
-        return self.active_time + (time.perf_counter() - self._start if self._start else 0.0)
 
 def fast_linreg_1d(x_arr, y_arr):
     """Computes 1D slope, intercept, and R2 using vectorized NumPy (100x faster than sklearn)."""
@@ -119,7 +102,7 @@ def compute_halflife_plastic_work_vare(stress_cycle, strain_cycle, E_ten_hl, E_c
 def power_func(x, a, b, c):
     return a + b * (x ** c)
 
-timer = BenchmarkTimer()
+script_cpu_start = time.process_time()
 
 # Global decision tracking variables
 conf_e = "Y"
@@ -395,8 +378,6 @@ col_force = confirm_col("Force / Stress", auto_detect_col('Force', all_columns),
 col_def = confirm_col("Deformation / Strain", auto_detect_col('Deformation', all_columns), all_columns)
 col_cycle = confirm_col("Cycle Number", auto_detect_col('Cycle', all_columns), all_columns)
 
-timer.start()
-
 # --- Safe Data Loading and JSON Rows_To_Skip Validation ---
 rows_to_skip_json = int(cfg_csv.get("Rows_To_Skip_Before_Zero", 1))
 data = pd.read_csv(data_file_path, delimiter=delimiter, decimal=decimal_sep, usecols=[col_time, col_force, col_def, col_cycle])
@@ -455,7 +436,6 @@ shutil.copy(cfg_file_path, os.path.join(output_dir, "Campaign_Config_Used.json")
 os.chdir(output_dir)
 
 print("\n" + "=" * 75 + f"\n--> ALL FIGURES AND CSVs ARE BEING SAVED TO:\n    {os.path.abspath(output_dir)}\n" + "=" * 75 + "\n")
-timer.pause()
 
 # =============================================================================
 # 3. SPECIMEN GEOMETRY & COMMON STRESS/STRAIN COMPUTATION
@@ -482,8 +462,6 @@ else:
     gauge_length = float(input(f"Enter extensometer gauge length [{def_gl} mm]: ") or def_gl)
     correctionFact = float(input(f"Enter extensometer correction factor [{cfg_geom.get('Correction_factor', 1.0)}]: ") or str(cfg_geom.get('Correction_factor', 1.0)))
 
-timer.start()
-
 # Handle trailing zeros in cycle column
 max_cycle = data['Cycle'].max()
 if max_cycle > 0:
@@ -505,9 +483,8 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig('Hysteresis_Loop.png')
-timer.pause()
+
 plt.show()
-timer.start()
 
 # Fast peak stress extraction via groupby
 peaks = data.groupby('Cycle', sort=False)['Stress'].agg(['max', 'min']).reset_index()
@@ -527,9 +504,8 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("SigMaxSigMin_vs_N.png")
-timer.pause()
+
 plt.show()
-timer.start()
 
 plt.figure()
 plt.plot(initial_data['Cycle'], initial_data['Sig_A'], marker='o', ls='-', label='Sig_A')
@@ -541,7 +517,6 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 # plt.savefig('Sig_A.png' if IS_STRAIN_CONTROL else 'amp_mean_stress.png')
-timer.pause()
 plt.show()
 
 # =============================================================================
@@ -558,7 +533,6 @@ if IS_STRAIN_CONTROL:
         N1 = int(input(f"Enter value for N1 [{def_n1}]: ") or def_n1)
         N2 = int(input(f"Enter value for N2 [{def_n2}]: ") or def_n2)
 
-        timer.start()
         ID1 = initial_data['Cycle'].sub(N1).abs().idxmin()
         ID2 = initial_data['Cycle'].sub(N2).abs().idxmin()
         x_init = np.array(initial_data.Cycle[ID1:ID2])
@@ -604,7 +578,6 @@ if IS_STRAIN_CONTROL:
         plt.legend(loc='lower left', framealpha=0.9)
         plt.tight_layout()
         plt.savefig("Nf.png", dpi=300)
-        timer.pause()
         plt.show()
 
         conf = input('Is it OK (Y/N) [Y]: ').strip().upper() or 'Y'
@@ -708,9 +681,7 @@ while True:
     ax2.grid(which="major", linestyle=":", color="black", alpha=0.6)
 
     plt.tight_layout()
-    timer.pause()
     plt.show()
-    timer.start()
 
     print(f"Total skipped ROWS so far: {rows_to_skip} rows from raw CSV (rows_to_skip in JSON)).")
     print(f"Please, interrupt the evaluation and change the value in JSON if initial data is missing!")
@@ -767,9 +738,7 @@ ax_eps_t.grid(which="minor", linestyle=":", color="grey")
 
 plt.tight_layout()
 plt.savefig('stress_strain_time_history.png')
-timer.pause()
 plt.show()
-timer.start()
 
 # Figure 2: First 10 Hysteresis Loops
 
@@ -784,9 +753,7 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig('initial_hysteresis_loops_10_cycles.png')
-timer.pause()
 plt.show()
-timer.start()
 
 # =============================================================================
 # 5. INITIAL YOUNG'S MODULUS EVALUATION WITH CONFIRMATION LOOP
@@ -801,7 +768,6 @@ while True:
     Lim1 = int(input(f"Enter value for Limit_bottom (MPa) [{def_lim1}]: ") or def_lim1)
     Lim2 = int(input(f"Enter value for Limit_upper (MPa) [{def_lim2}]: ") or def_lim2)
 
-    timer.start()
     first_cyc_num = ini_cycle if ini_cycle in data['Cycle'].values else data['Cycle'].min()
     first_cyc_data = data[data['Cycle'] == first_cyc_num]
     Max_value = first_cyc_data['Stress'].idxmax()
@@ -832,17 +798,13 @@ while True:
     plt.grid(which="minor", linestyle=":", color="grey")
     plt.tight_layout()
     plt.savefig("Young's Modulus.png")
-    timer.pause()
     plt.show()
 
     conf_E_ok = input('Is it OK (Y/N) [Y]: ').strip().upper() or 'Y'
     if conf_E_ok == 'Y':
-        timer.start()
         E = E_calc
         shiftE = shiftE_calc
         data['Strain'] = data['Strain'] - shiftE
-
-        timer.pause()
         def_use_eval = "Y" if cfg_common.get("Use_Evaluated_E", True) else "N"
         conf_use_e = input(f'Would you like to use evaluated value {E_calc:.1f} MPa (Y/N/M-modify) - when N, E0={E0:.0f} MPa is used [{def_use_eval}]: ').strip().upper() or def_use_eval
         if conf_use_e == 'N':
@@ -858,7 +820,6 @@ while True:
                     print("[ERROR] Please enter a valid integer.\n")
                     continue
             E = chosen_E          
-        timer.start()
         break
 
 # Setup Evaluation_input arrays
@@ -907,7 +868,6 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig('WP_vs_N.png')
-timer.pause()
 plt.show()
 
 # =============================================================================
@@ -938,7 +898,6 @@ el_size_val_t = float(def_el_size_t)
 skip_pts_t = 0
 
 while True:
-    timer.start()
     fit_start_t = min(skip_pts_t, max(0, len(cal_branch_stress) - 3))
     ref_min_stress = cal_branch_stress[fit_start_t]
     search_val_cal_t = ref_min_stress + el_size_val_t
@@ -983,7 +942,6 @@ while True:
 
     plt.tight_layout()
     plt.savefig("Dynamic modulus - Tension - fit calibration cycle.png")
-    timer.pause()
     plt.show()
 
     conf_cal_t = input(f"Is the linear fit in tension (upper) branch on cycle {target_calib_cycle} OK? (Y/N) [Y]: ").strip().upper() or "Y"
@@ -996,7 +954,6 @@ while True:
         el_size_val_t = float(input(f"Enter elastic region size [{el_size_val_t:.1f} MPa]: ") or str(el_size_val_t))
         skip_pts_t = int(input("Enter initial points to skip at reversal corner [2]: ") or "2")
 
-timer.start()
 print('Evaluating dynamic modulus in tensile (upper) branch for all cycles...')
 E_dyn_tension_list, sig_int_tension_list = [], []
 Cycle_E_dyn = []
@@ -1068,9 +1025,7 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("Dynamic modulus-Tension.png")
-timer.pause()
 plt.show()
-timer.start()
 
 # --- PART 2: DYNAMIC MODULUS IN COMPRESSION ---
 peak_p_cal = int(np.argmax(c_strain_cal))
@@ -1088,7 +1043,6 @@ el_size_val_c = float(def_el_size_c)
 skip_pts_c = 0
 
 while True:
-    timer.start()
     fit_start_c = min(skip_pts_c, max(0, len(cal_c_branch_stress) - 3))
     ref_max_stress = cal_c_branch_stress[fit_start_c]
     search_val_cal_c = ref_max_stress - el_size_val_c
@@ -1133,7 +1087,6 @@ while True:
 
     plt.tight_layout()
     plt.savefig("Dynamic modulus - Compression - fit calibration cycle.png")
-    timer.pause()
     plt.show()
 
     conf_cal_c = input(f"Is the linear fit in compression (bottom) branch on cycle {target_calib_cycle} OK? (Y/N) [Y]: ").strip().upper() or "Y"
@@ -1144,7 +1097,6 @@ while True:
         el_size_val_c = float(input(f"Enter compressive elastic region size [{el_size_val_c:.1f} MPa]: ") or str(el_size_val_c))
         skip_pts_c = int(input("Enter initial points to skip at peak turnaround corner [2]: ") or "2")
 
-timer.start()
 print('Evaluating dynamic modulus in compression (bottom branch of hyst.loop) for all cycles...')
 E_dyn_compression_list, sig_int_compression_list = [], []
 
@@ -1212,9 +1164,7 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("Dynamic modulus - comparison.png")
-timer.pause()
 plt.show()
-timer.start()
 
 # =============================================================================
 # 8. CYCLIC HARDENING/SOFTENING (AMPLITUDE & MEAN VALUES)
@@ -1247,9 +1197,7 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("Amplitude-mean stress.png")
-timer.pause()
 plt.show()
-timer.start()
 
 min_len_eps = min(len(Cycle_E_dyn if IS_STRAIN_CONTROL else Cycles_list), len(epsilon_A), len(epsilon_M))
 plt.figure()
@@ -1264,9 +1212,7 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("Amplitude-mean strain.png")
-timer.pause()
 plt.show()
-timer.start()
 
 # =============================================================================
 # 9. CYCLIC YIELD STRESS EVALUATION (Rp)
@@ -1277,7 +1223,6 @@ rp_equivalent = float(rp_input_str)
 if IS_STRAIN_CONTROL: Evaluation_input[4, 0] = rp_equivalent
 else: Evaluation_input[6, 0] = rp_equivalent
 
-timer.start()
 _L = min(len(Cycles_list), len(sigma_A), len(E_dyn_tension_list), len(E_dyn_compression_list))
 output_2 = pd.DataFrame({
     'Cycle': (Cycles_list if IS_STRAIN_CONTROL else Cycles_list)[:_L],
@@ -1300,9 +1245,7 @@ if IS_STRAIN_CONTROL:
     plt.grid(which="minor", linestyle=":", color="grey")
     plt.tight_layout()
     plt.savefig("Amplitude_axial_plastic_strain.png")
-    timer.pause()
     plt.show()
-    timer.start()
 
 # Map E_tension to full dataset for yield stress calculation
 e_map = dict(zip(output_2['Cycle'], output_2['E_tension']))
@@ -1363,7 +1306,6 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("Cyclic yield stress.png")
-timer.pause()
 plt.show()
 
 # Interactive Validity Range Selection
@@ -1377,7 +1319,6 @@ while conf_range == 'Y':
     sig_val_min = float(input(f"Enter minimum valid cyclic yield stress (MPa) [{cfg_val_range[0]}]: ") or str(cfg_val_range[0]))
     sig_val_max = float(input(f"Enter maximum valid cyclic yield stress (MPa) [{cfg_val_range[1]}]: ") or str(cfg_val_range[1]))
 
-    timer.start()
     mask_valid = (output_2['cyclic_yield_stress_prefilter'] >= sig_val_min) & (output_2['cyclic_yield_stress_prefilter'] <= sig_val_max)
     s_screened = output_2['cyclic_yield_stress_prefilter'].copy()
     s_screened.loc[~mask_valid] = np.nan
@@ -1394,14 +1335,12 @@ while conf_range == 'Y':
     plt.grid(which="minor", linestyle=":", color="grey")
     plt.tight_layout()
     plt.savefig("Cyclic yield stress.png")
-    timer.pause()
     plt.show()
 
     conf_ok = input('Is this validity range OK? (Y/N) [Y]: ').strip().upper() or 'Y'
     if conf_ok == 'Y':
         break
 
-timer.start()
 # 3-curve Comparison Plot required by protocols
 plt.figure()
 plt.scatter(cyc_col, output_2['sigma_A'], marker='o', ls='-', label='Stress amplitude')
@@ -1416,9 +1355,7 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("Cyclic ye vs Amp Mean stress.png")
-timer.pause()
 plt.show()
-timer.start()
 
 # =============================================================================
 # 10. HALF-LIFE CYCLE, HYSTERESIS LOOPS & PLASTIC WORK
@@ -1462,7 +1399,6 @@ if IS_STRAIN_CONTROL:
     plt.grid(which="minor", linestyle=":", color="grey")
     plt.tight_layout()
     plt.savefig("HystLoopHalflife_Comparison.png")
-    timer.pause()
     plt.show()
 
     def_prev_choice = "y" if cfg.get("Strain_Control_Specific", {}).get("Prefer_Previous_Cycle_At_Half_Life", False) else "n"
@@ -1471,7 +1407,6 @@ if IS_STRAIN_CONTROL:
         if choice == 'y':
             half_life_history = prev_life_history
             half_life = half_life_prev
-    timer.start()
 else:
     # Representative loops for ratcheting
     sample_cycles = sorted(list(set([1, max(1, Nf//6), max(1, Nf//3), half_life, max(1, 2*Nf//3), max(1, 5*Nf//6), Nf - 1])))
@@ -1489,7 +1424,6 @@ else:
     plt.grid(which="minor", linestyle=":", color="grey")
     plt.tight_layout()
     plt.savefig("HystLoopsChosen.png")
-    timer.pause()
     plt.show()
 
     plt.figure()
@@ -1503,7 +1437,6 @@ else:
         print('\nPLEASE, DEFINE THE RANGE FOR RATCHETING RATE EVALUATION!')
         N1_rat_val = int(input(f"Enter value for N1_RAT [{cfg_rat_range[0]}]: ") or str(cfg_rat_range[0]))
         N2_rat_val = int(input(f"Enter value for N2_RAT [{cfg_rat_range[1]}]: ") or str(cfg_rat_range[1]))
-        timer.start()
         N1_RAT = cyc_col.sub(N1_rat_val).abs().idxmin()
         N2_RAT = cyc_col.sub(N2_rat_val).abs().idxmin()
         x_init_rat = np.array(cyc_col.iloc[N1_RAT:N2_RAT])
@@ -1523,7 +1456,6 @@ else:
         plt.grid(which="minor", linestyle=":", color="grey")
         plt.tight_layout()
         plt.savefig("Ratcheting_rate_regression.png", dpi=200)
-        timer.pause()
         plt.show()
 
         conf_rat = input('Is it OK (Y/N) [Y]: ').strip().upper() or 'Y'
@@ -1531,23 +1463,6 @@ else:
             Evaluation_input[0, 0] = N1_rat_val
             Evaluation_input[1, 0] = N2_rat_val
             break
-
-    timer.start()
-    # plt.figure()
-    # plt.scatter(cyc_col, output_2['epsilon_A'], marker='o', ls='-', label='Strain amplitude')
-    # plt.scatter(cyc_col, output_2['epsilon_M'], marker='o', ls='-', label='Mean strain')
-    # plt.plot(x_init_rat, Eps_rate_half_life * x_init_rat + inc_rat, linestyle='--', color='r', label=f'y={Eps_rate_half_life:.10f}*x+{inc_rat:.4f}')
-    # plt.title('Ratcheting and cyclic hardening/softening curve')
-    # plt.legend(loc='upper left')
-    # plt.xlabel("Number of cycles")
-    # plt.ylabel("Amplitude strain, Mean strain")
-    # plt.minorticks_on()
-    # plt.grid(which="major", linestyle=":", color="black")
-    # plt.grid(which="minor", linestyle=":", color="grey")
-    # plt.tight_layout()
-    # plt.savefig("cyclic hardening_2.png")
-    # timer.pause()
-    # plt.show()
 
 half_life_history.to_csv('half_life_history.csv', index=False)
 
@@ -1562,9 +1477,7 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("HystLoopHalflife.png")
-timer.pause()
 plt.show()
-timer.start()
 
 # Entire time history & FEM outputs
 entire_time_history = pd.DataFrame(data=data['Stress'])
@@ -1582,11 +1495,9 @@ entire_time_history.to_csv('entire_history.csv')
 # =============================================================================
 if not IS_STRAIN_CONTROL:
     cfg_e10_range = cfg.get("Stress_Control_Specific", {}).get("Default_N_E10_Range", [max(1, half_life - 50), min(Nf, half_life + 50)])
-    timer.pause()
     print('\nPLEASE, DEFINE THE RANGE FOR HALF-LIFE VALUES EVALUATION (INCLUDING HALF LIFE)!')
     N1_E10 = int(input(f"Enter value for N1 [{cfg_e10_range[0]}]: ") or str(cfg_e10_range[0]))
     N2_E10 = int(input(f"Enter value for N2 [{cfg_e10_range[1]}]: ") or str(cfg_e10_range[1]))
-    timer.start()
     ID1 = cyc_col.sub(N1_E10).abs().idxmin()
     ID2 = cyc_col.sub(N2_E10).abs().idxmin()
     Evaluation_input[2, 0] = N1_E10
@@ -1643,9 +1554,7 @@ plt.grid(which="major", linestyle=":", color="black")
 plt.grid(which="minor", linestyle=":", color="grey")
 plt.tight_layout()
 plt.savefig("Dynamic modulus-Compression.png")
-timer.pause()
 plt.show()
-timer.start()
 
 decrease_in_pct = float(cfg_common.get("Edyn_Compression_Drop_Percent", 10.0))
 
@@ -1919,11 +1828,9 @@ if used_approximation_fit:
 plt.tight_layout()
 plt.savefig('E_compression_Nf10_determination.png', dpi=300)
 
-timer.pause()
 plt.show()
-timer.start()
 
-comp_time_sec = round(timer.elapsed(), 3)
+comp_time_sec = round(time.process_time() - script_cpu_start, 3)
 
 # =============================================================================
 # 12. SAVE TABLES (output_half.csv, Evaluation_input.csv, For_FEM.csv)

@@ -20,6 +20,9 @@ Parameters.txt
 
 # Generated protocols (except user manual)
 *.pdf
+!docs/Protocol_eN.pdf
+!docs/Protocol_LCF.pdf
+!docs/Protocol_Ratcheting.pdf
 !docs/User_Manual.pdf
 
 # Generated plots (except header logo)
